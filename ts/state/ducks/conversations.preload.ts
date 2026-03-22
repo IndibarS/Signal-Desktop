@@ -6613,6 +6613,7 @@ export function reducer(
         pinnedMessages
       ),
       messagesByConversation: {
+        ...state.messagesByConversation,
         [conversationId]: {
           ...existingConversation,
           messageIds,
