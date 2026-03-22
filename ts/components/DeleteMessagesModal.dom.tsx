@@ -1,15 +1,17 @@
 // Copyright 2023 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { MouseEvent } from 'react';
 import React, { useCallback, useState } from 'react';
 import type { LocalizerType } from '../types/Util.std.js';
 import type { ShowToastAction } from '../state/ducks/toast.preload.js';
 import { ToastType } from '../types/Toast.dom.js';
 import { AxoAlertDialog } from '../axo/AxoAlertDialog.dom.js';
+import { AxoCheckbox } from '../axo/AxoCheckbox.dom.js';
+import { tw } from '../axo/tw.dom.js';
 
 export type DeleteMessagesModalProps = Readonly<{
   isMe: boolean;
+  title: string;
   canDeleteForEveryone: boolean;
   needsAdminDelete: boolean;
   isDeletingOwnMessages: boolean;
@@ -32,6 +34,7 @@ enum Step {
 
 export default function DeleteMessagesModal({
   isMe,
+  title,
   canDeleteForEveryone,
   needsAdminDelete,
   isDeletingOwnMessages,
@@ -92,14 +95,20 @@ export default function DeleteMessagesModal({
     <>
       <DeleteMessagesSelectDeleteTypeDialog
         isMe={isMe}
+        title={title}
         canDeleteForEveryone={canDeleteForEveryone}
         i18n={i18n}
         messageCount={messageCount}
         tooManyMessages={tooManyMessages}
         open={step === Step.SELECT_DELETE_TYPE}
         onClose={onClose}
-        onSelectDeleteForMe={handleSelectDeleteForMe}
-        onSelectDeleteForEveryone={handleSelectDeleteForEveryone}
+        onDelete={alsoDeleteForEveryone => {
+          if (alsoDeleteForEveryone) {
+            handleSelectDeleteForEveryone();
+          } else {
+            handleSelectDeleteForMe();
+          }
+        }}
       />
       <DeleteMessagesConfirmAdminDeleteDialog
         i18n={i18n}
@@ -117,16 +126,17 @@ export default function DeleteMessagesModal({
 
 function DeleteMessagesSelectDeleteTypeDialog(props: {
   isMe: boolean;
+  title: string;
   canDeleteForEveryone: boolean;
   i18n: LocalizerType;
   messageCount: number;
   tooManyMessages: boolean;
   open: boolean;
   onClose: () => void;
-  onSelectDeleteForMe: () => void;
-  onSelectDeleteForEveryone: () => void;
+  onDelete: (alsoDeleteForEveryone: boolean) => void;
 }) {
-  const { i18n, onClose, onSelectDeleteForEveryone } = props;
+  const { i18n, onClose, onDelete, title } = props;
+  const [alsoDeleteForEveryone, setAlsoDeleteForEveryone] = useState(false);
 
   const handleOpenChange = useCallback(
     (value: boolean) => {
@@ -135,14 +145,6 @@ function DeleteMessagesSelectDeleteTypeDialog(props: {
       }
     },
     [onClose]
-  );
-
-  const handleSelectDeleteForEveryone = useCallback(
-    (event: MouseEvent) => {
-      event.preventDefault();
-      onSelectDeleteForEveryone();
-    },
-    [onSelectDeleteForEveryone]
   );
 
   return (
@@ -164,25 +166,31 @@ function DeleteMessagesSelectDeleteTypeDialog(props: {
                   count: props.messageCount,
                 })}
           </AxoAlertDialog.Description>
+          {props.canDeleteForEveryone && !props.isMe && (
+            <div className={tw('flex items-center gap-2 mt-4')}>
+              <AxoCheckbox.Root
+                id="alsoDeleteForEveryone"
+                variant="square"
+                checked={alsoDeleteForEveryone}
+                onCheckedChange={setAlsoDeleteForEveryone}
+              />
+              <label
+                htmlFor="alsoDeleteForEveryone"
+                className={tw('text-label-primary text-sm cursor-pointer select-none')}
+              >
+                {i18n('icu:DeleteMessagesModal--alsoDeleteForEveryone', { name: title })}
+              </label>
+            </div>
+          )}
         </AxoAlertDialog.Body>
         <AxoAlertDialog.Footer>
           <AxoAlertDialog.Cancel>{i18n('icu:cancel')}</AxoAlertDialog.Cancel>
           <AxoAlertDialog.Action
             variant="subtle-destructive"
-            onClick={props.onSelectDeleteForMe}
+            onClick={() => onDelete(alsoDeleteForEveryone)}
           >
-            {props.isMe
-              ? i18n('icu:DeleteMessagesModal--noteToSelf--deleteSync')
-              : i18n('icu:DeleteMessagesModal--deleteForMe')}
+            {i18n('icu:delete')}
           </AxoAlertDialog.Action>
-          {props.canDeleteForEveryone && !props.isMe && (
-            <AxoAlertDialog.Action
-              variant="subtle-destructive"
-              onClick={handleSelectDeleteForEveryone}
-            >
-              {i18n('icu:DeleteMessagesModal--deleteForEveryone')}
-            </AxoAlertDialog.Action>
-          )}
         </AxoAlertDialog.Footer>
       </AxoAlertDialog.Content>
     </AxoAlertDialog.Root>

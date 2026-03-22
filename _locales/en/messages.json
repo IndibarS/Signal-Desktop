@@ -15,6 +15,10 @@
     "messageformat": "Add to a group",
     "description": "Shown as the title of the dialog that allows you to add a contact to an group"
   },
+  "icu:DeleteMessagesModal--alsoDeleteForEveryone": {
+    "messageformat": "Also delete for {name}",
+    "description": "Label for checkbox in delete messages modal to delete for everyone"
+  },
   "icu:AddUserToAnotherGroupModal__confirm-title": {
     "messageformat": "Add new member?",
     "description": "Shown as the title of the confirmation dialog when adding a contact to a group, after having selected the group"

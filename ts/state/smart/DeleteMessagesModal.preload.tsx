@@ -86,6 +86,7 @@ export const SmartDeleteMessagesModal = memo(
     return (
       <DeleteMessagesModal
         isMe={isMe}
+        title={conversation.title}
         canDeleteForEveryone={canDeleteForEveryone}
         needsAdminDelete={needsAdminDelete}
         isDeletingOwnMessages={isDeletingOwnMessages}
