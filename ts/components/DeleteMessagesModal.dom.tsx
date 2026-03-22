@@ -136,7 +136,7 @@ function DeleteMessagesSelectDeleteTypeDialog(props: {
   onDelete: (alsoDeleteForEveryone: boolean) => void;
 }) {
   const { i18n, onClose, onDelete, title } = props;
-  const [alsoDeleteForEveryone, setAlsoDeleteForEveryone] = useState(false);
+  const [alsoDeleteForEveryone, setAlsoDeleteForEveryone] = useState(true);
 
   const handleOpenChange = useCallback(
     (value: boolean) => {
